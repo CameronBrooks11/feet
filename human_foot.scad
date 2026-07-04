@@ -49,6 +49,7 @@ malleolus_shift = 6; // fore/aft: medial sits forward (+x), lateral back (-x)
 hallux_length = 42; // big-toe length; the others taper shorter
 toe_diameter = 26;
 toe_splay = 14; // total fan of the toe tips, degrees
+toe_gap = -3; // adjacent-toe packing: centre spacing = radii sum + this; negative overlaps [mm]
 
 /* [Toenails] */
 nail_length = 0.38; // nail length as a fraction of the toe length
@@ -98,16 +99,25 @@ module malleoli() {
   translate([ankle_x - malleolus_shift, -malleolus_out, malleolus_lat_z]) ellipsoid(bump);
 }
 
+toe_count = 5; // human foot
+
+function toe_frac(i) = toe_count > 1 ? i / (toe_count - 1) : 0; // 0 = hallux, 1 = little toe
+function toe_dia_at(i) = toe_diameter * (1 - toe_frac(i) * 0.42); // size falloff toward the little toe
+function toe_len_at(i) = hallux_length * (1 - toe_frac(i) * 0.30); // length falloff
+// cumulative centre-to-centre offset from the hallux; spacing tracks each toe's radius
+function toe_off(i) = i <= 0 ? 0 : toe_off(i - 1) + (toe_dia_at(i - 1) + toe_dia_at(i)) / 2 + toe_gap;
+
 module toes() {
-  //! Five hull-of-two-spheres toes; hallux medial (+y) and largest
-  n = 5;
-  for (i = [0:n - 1]) {
-    f = i / (n - 1); // 0 = hallux (medial), 1 = little toe (lateral)
-    s = 1 - f * 0.42; // size falloff toward the little toe
-    d = toe_diameter * s; // this toe's diameter
-    len = hallux_length * (1 - f * 0.30); // this toe's length
-    y = ball_width / 2 * (0.60 - f * 1.3); // spread from +y (medial) to -y (lateral)
-    x0 = foot_length - ball_length * 0.24 - f * 6; // proximal end embedded into the ball
+  //! Five hull-of-two-spheres toes; hallux medial (+y) and largest.
+  //! Spacing is diameter-aware (see toe_off) so crowding is uniform fat-to-thin.
+  span = toe_off(toe_count - 1);
+  y_first = span / 2; // centre the toe fan across the ball
+  for (i = [0:toe_count - 1]) {
+    f = toe_frac(i);
+    d = toe_dia_at(i); // this toe's diameter
+    len = toe_len_at(i); // this toe's length
+    y = y_first - toe_off(i); // diameter-aware spread from +y (medial) to -y (lateral)
+    x0 = foot_length - ball_length * 0.24 - f * 6; // lateral toes set slightly back
     z0 = ball_height * 0.32; // ride up near the ball front, then angle down to the tip
     splay = (0.5 - f) * toe_splay; // fan the tips outward in y
 
