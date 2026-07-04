@@ -112,9 +112,9 @@ module digits() {
   }
 }
 
-module claw(tip) {
-  //! A tapered claw curving down-forward from a digit tip
-  translate(tip) rotate([0, 90 + claw_droop, 0])
+module claw(tip, yaw = 0) {
+  //! A tapered claw curving down-forward from a digit tip; yaw swings it in-plane
+  translate(tip) rotate([0, 0, yaw]) rotate([0, 90 + claw_droop, 0])
     cylinder(d1=claw_base, d2=claw_base * 0.12, h=claw_length);
 }
 
@@ -131,14 +131,14 @@ module pads() {
 }
 
 module dewclaw() {
-  //! The raised inner digit + claw, up the medial (+y) side of the pastern
-  base = [pastern_base[0] + 6, paw_width * 0.32, paw_lift + paw_height * 1.1];
-  tip = base + [14, 6, -4];
+  //! The raised inner dewclaw, up the medial (+y) side of the pastern, angled outward
+  base = [pastern_base[0] + 2, paw_width * 0.4, paw_lift + paw_height * 0.78]; // medial, at the paw-pastern junction
+  tip = base + [6, 8, -6]; // juts outward (+y) and down, set behind the digit row
   hull() {
     translate(base) sphere(d=digit_diameter * 0.7);
     translate(tip) sphere(d=digit_diameter * 0.5);
   }
-  claw(tip);
+  claw(tip, yaw=48); // claw droops down-and-outward like the reference
 }
 
 module limb_segment(p0, p1, d0, d1) {
