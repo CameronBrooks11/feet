@@ -37,6 +37,13 @@ ankle_x = 56; // stump position, measured from the back of the heel
 ankle_diameter = 64;
 ankle_height = 115; // cut off flat at the top
 
+/* [Malleoli] */
+malleolus_diameter = 26; // ankle-bump size
+malleolus_out = 25; // sideways offset of the bump centre from the ankle axis
+malleolus_med_z = 60; // medial (inner) bump height — sits higher
+malleolus_lat_z = 48; // lateral (outer) bump height — sits lower
+malleolus_shift = 6; // fore/aft: medial sits forward (+x), lateral back (-x)
+
 /* [Toes] */
 hallux_length = 42; // big-toe length; the others taper shorter
 toe_diameter = 26;
@@ -74,10 +81,21 @@ module human_foot() {
         translate([ankle_x, 0, ankle_height - ankle_diameter / 2])
           cylinder(d=ankle_diameter, h=ankle_diameter / 2 + zFite);
       }
+
+      malleoli();
     }
     arch_cutter();
   }
   toes();
+}
+
+module malleoli() {
+  //! The two ankle bumps. Medial (inner, +y) is higher + forward; lateral
+  //! (outer, -y) is lower + further back — the anatomical asymmetry.
+  translate([ankle_x + malleolus_shift, malleolus_out, malleolus_med_z])
+    sphere(d=malleolus_diameter);
+  translate([ankle_x - malleolus_shift, -malleolus_out, malleolus_lat_z])
+    sphere(d=malleolus_diameter);
 }
 
 module toes() {
