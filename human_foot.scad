@@ -39,7 +39,8 @@ ankle_height = 115; // cut off flat at the top
 
 /* [Malleoli] */
 malleolus_diameter = 26; // ankle-bump size
-malleolus_out = 25; // sideways offset of the bump centre from the ankle axis
+malleolus_elong = 1.25; // vertical stretch — bumps are a bit taller than wide
+malleolus_out = 24; // sideways offset of the bump centre from the ankle axis (protrudes ~10% less)
 malleolus_med_z = 60; // medial (inner) bump height — sits higher
 malleolus_lat_z = 48; // lateral (outer) bump height — sits lower
 malleolus_shift = 6; // fore/aft: medial sits forward (+x), lateral back (-x)
@@ -47,7 +48,7 @@ malleolus_shift = 6; // fore/aft: medial sits forward (+x), lateral back (-x)
 /* [Toes] */
 hallux_length = 42; // big-toe length; the others taper shorter
 toe_diameter = 26;
-toe_splay = 12; // total fan of the toe tips, degrees
+toe_splay = 14; // total fan of the toe tips, degrees
 
 /* [Toenails] */
 nail_length = 0.38; // nail length as a fraction of the toe length
@@ -92,10 +93,9 @@ module human_foot() {
 module malleoli() {
   //! The two ankle bumps. Medial (inner, +y) is higher + forward; lateral
   //! (outer, -y) is lower + further back — the anatomical asymmetry.
-  translate([ankle_x + malleolus_shift, malleolus_out, malleolus_med_z])
-    sphere(d=malleolus_diameter);
-  translate([ankle_x - malleolus_shift, -malleolus_out, malleolus_lat_z])
-    sphere(d=malleolus_diameter);
+  bump = [malleolus_diameter, malleolus_diameter, malleolus_diameter * malleolus_elong];
+  translate([ankle_x + malleolus_shift, malleolus_out, malleolus_med_z]) ellipsoid(bump);
+  translate([ankle_x - malleolus_shift, -malleolus_out, malleolus_lat_z]) ellipsoid(bump);
 }
 
 module toes() {
@@ -106,7 +106,7 @@ module toes() {
     s = 1 - f * 0.42; // size falloff toward the little toe
     d = toe_diameter * s; // this toe's diameter
     len = hallux_length * (1 - f * 0.30); // this toe's length
-    y = ball_width / 2 * (0.60 - f * 1.25); // spread from +y (medial) to -y (lateral)
+    y = ball_width / 2 * (0.60 - f * 1.3); // spread from +y (medial) to -y (lateral)
     x0 = foot_length - ball_length * 0.24 - f * 6; // proximal end embedded into the ball
     z0 = ball_height * 0.32; // ride up near the ball front, then angle down to the tip
     splay = (0.5 - f) * toe_splay; // fan the tips outward in y
@@ -124,11 +124,11 @@ module toenail(d, len, x0, y, z0, splay) {
   nl = len * nail_length; // nail length along the toe
   nw = d * nail_width; // nail width across the toe
   nz = nail_raise + 3; // z-thickness; most of it sinks into the toe so it fuses (thin plate)
-  t = 0.88; // fraction along the toe (proximal 0 -> tip 1): sits on the distal phalanx, near the tip
-  ax = x0 + t * len * cos(splay);
-  ay = y + t * len * sin(splay);
-  az = z0 + t * (d / 2 * 0.85 - z0); // toe centreline height at t
-  r = 0.525 * d + t * (0.41 * d - 0.525 * d); // toe radius at t (proximal knuckle -> distal)
+  t = 1.0; // fraction along the toe (proximal 0 -> tip 1): sits on the distal phalanx, near the tip
+  ax = x0 +  len * cos(splay);
+  ay = y +  len * sin(splay);
+  az = z0 +  (d / 2 * 0.85 - z0); // toe centreline
+  r = 0.525 * d + (0.41 * d - 0.525 * d); // toe radius at 
   top = az + r; // actual dorsal surface height
   translate([ax, ay, top + nail_raise - nz / 2])
     rotate([0, 0, splay]) ellipsoid([nl, nw, nz]);
