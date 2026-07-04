@@ -27,7 +27,10 @@ heel_height = 62;
 /* [Ball] */
 ball_length = 82;
 ball_width = 95;
-ball_height = 44;
+ball_height = 36;
+
+/* [Arch] */
+arch_height = 18; // medial arch lift carved into the sole [mm]
 
 /* [Ankle] */
 ankle_x = 56; // stump position, measured from the back of the heel
@@ -51,20 +54,24 @@ module human_foot() {
   heel_c = [heel_length / 2, 0, heel_height / 2]; // back of heel at x = 0
   ball_c = [foot_length - ball_length / 2, 0, ball_height / 2];
 
-  // main body: heel blended into the ball
-  hull() {
-    translate(heel_c) ellipsoid(heel);
-    translate(ball_c) ellipsoid(ball);
-  }
+  // main body: heel blended into the ball, with the medial arch carved out below
+  difference() {
+    union() {
+      hull() {
+        translate(heel_c) ellipsoid(heel);
+        translate(ball_c) ellipsoid(ball);
+      }
 
-  // ankle: an instep blend ellipsoid pulled up into a flat-topped stump
-  hull() {
-    translate([ankle_x, 0, ball_height * 0.5])
-      ellipsoid([ankle_diameter * 1.4, heel_width * 0.95, ball_height]);
-    translate([ankle_x, 0, ankle_height - ankle_diameter / 2])
-      cylinder(d=ankle_diameter, h=ankle_diameter / 2 + zFite);
+      // ankle: an instep blend ellipsoid pulled up into a flat-topped stump
+      hull() {
+        translate([ankle_x, 0, ball_height * 0.5])
+          ellipsoid([ankle_diameter * 1.4, heel_width * 0.95, ball_height]);
+        translate([ankle_x, 0, ankle_height - ankle_diameter / 2])
+          cylinder(d=ankle_diameter, h=ankle_diameter / 2 + zFite);
+      }
+    }
+    arch_cutter();
   }
-
   toes();
 }
 
@@ -86,6 +93,19 @@ module toes() {
       translate([x0 + len * cos(splay), y + len * sin(splay), d / 2 * 0.85]) sphere(d=d * 0.82);
     }
   }
+}
+
+module arch_cutter() {
+  //! Scoops the underside between heel and ball, biased medial (+y), to form the arch
+  x0 = heel_length * 0.6; // start just forward of the heel
+  x1 = foot_length - ball_length * 0.6; // stop just behind the ball
+  xc = (x0 + x1) / 2;
+  len = (x1 - x0) * 1.2; // elongated lengthwise; tapered ends keep heel + ball in contact
+  wid = ball_width * 0.65; // narrow trough along the medial border
+  yc = ball_width * 0.42; // biased medial; foot centre + lateral sole stay flat
+  zext = arch_height + 14; // shallow scoop; its upper dome is the arch surface
+  zc = arch_height - zext / 2; // top of the scoop sits at z = arch_height
+  translate([xc, yc, zc]) ellipsoid([len, wid, zext]);
 }
 
 module ellipsoid(dims) {
