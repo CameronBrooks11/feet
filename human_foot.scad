@@ -42,6 +42,11 @@ hallux_length = 42; // big-toe length; the others taper shorter
 toe_diameter = 26;
 toe_splay = 12; // total fan of the toe tips, degrees
 
+/* [Toenails] */
+nail_length = 0.38; // nail length as a fraction of the toe length
+nail_width = 0.8; // nail width as a fraction of the toe diameter
+nail_raise = 0.9; // height the nail stands proud of the toe [mm]
+
 human_foot();
 
 // --- geometry ----------------------------------------------------------------
@@ -92,7 +97,23 @@ module toes() {
       translate([x0, y, z0]) sphere(d=d * 1.05); // proximal knuckle, merges into the ball
       translate([x0 + len * cos(splay), y + len * sin(splay), d / 2 * 0.85]) sphere(d=d * 0.82);
     }
+    toenail(d, len, x0, y, z0, splay);
   }
+}
+
+module toenail(d, len, x0, y, z0, splay) {
+  //! Oval nail plate centred on the dorsal surface of the distal phalanx
+  nl = len * nail_length; // nail length along the toe
+  nw = d * nail_width; // nail width across the toe
+  nz = nail_raise + 3; // z-thickness; most of it sinks into the toe so it fuses (thin plate)
+  t = 0.88; // fraction along the toe (proximal 0 -> tip 1): sits on the distal phalanx, near the tip
+  ax = x0 + t * len * cos(splay);
+  ay = y + t * len * sin(splay);
+  az = z0 + t * (d / 2 * 0.85 - z0); // toe centreline height at t
+  r = 0.525 * d + t * (0.41 * d - 0.525 * d); // toe radius at t (proximal knuckle -> distal)
+  top = az + r; // actual dorsal surface height
+  translate([ax, ay, top + nail_raise - nz / 2])
+    rotate([0, 0, splay]) ellipsoid([nl, nw, nz]);
 }
 
 module arch_cutter() {
