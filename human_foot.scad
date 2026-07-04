@@ -112,7 +112,8 @@ module toes() {
   //! Spacing is diameter-aware (see toe_off) so crowding is uniform fat-to-thin.
   span = toe_off(toe_count - 1);
   y_first = span / 2; // centre the toe fan across the ball
-  for (i = [0:toe_count - 1]) {
+  intersection() {
+    union() for (i = [0:toe_count - 1]) {
     f = toe_frac(i);
     d = toe_dia_at(i); // this toe's diameter
     len = toe_len_at(i); // this toe's length
@@ -126,6 +127,9 @@ module toes() {
       translate([x0 + len * cos(splay), y + len * sin(splay), d / 2 * 0.85]) sphere(d=d * 0.82);
     }
     toenail(d, len, x0, y, z0, splay);
+    }
+    translate([foot_length, 0, ankle_height / 2])
+      cube([foot_length, ball_width * 2, ankle_height], center=true); // clamp toes to z >= 0 so they rest flat
   }
 }
 
