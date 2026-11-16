@@ -1,0 +1,3 @@
+title: feet
+description: Parametric OpenSCAD models of a human, a dog and a chicken foot, for teaching and visualization
+models: human_foot.scad, dog_foot.scad, chicken_foot.scad
