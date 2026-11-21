@@ -126,7 +126,7 @@ module toes() {
                 translate([x0, y, z0]) sphere(d=d * 1.05); // proximal knuckle, merges into the ball
                 translate([x0 + len * cos(splay), y + len * sin(splay), d / 2 * 0.85]) sphere(d=d * 0.82);
             }
-            toenail(d, len, x0, y, z0, splay);
+            toenail(d, len, x0, y, splay);
         }
         translate([foot_length, 0, ankle_height / 2])
             cube([foot_length, ball_width * 2, ankle_height], center=true);
@@ -134,17 +134,14 @@ module toes() {
     }
 }
 
-module toenail(d, len, x0, y, z0, splay) {
+module toenail(d, len, x0, y, splay) {
     //! Oval nail plate centred on the dorsal surface of the distal phalanx
     nl = len * nail_length; // nail length along the toe
     nw = d * nail_width; // nail width across the toe
     nz = nail_raise + 3; // z-thickness; most of it sinks into the toe so it fuses (thin plate)
-    t = 1.0; // fraction along the toe (proximal 0 -> tip 1): sits on the distal phalanx, near the tip
     ax = x0 + len * cos(splay);
     ay = y + len * sin(splay);
-    az = z0 + (d / 2 * 0.85 - z0); // toe centreline
-    r = 0.525 * d + (0.41 * d - 0.525 * d); // toe radius at 
-    top = az + r; // actual dorsal surface height
+    top = d / 2 * 0.85 + 0.41 * d; // dorsal surface: the toe tip's centre plus its radius
     translate([ax, ay, top + nail_raise - nz / 2])
         rotate([0, 0, splay]) ellipsoid([nl, nw, nz]);
 }

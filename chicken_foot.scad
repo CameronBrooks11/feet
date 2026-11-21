@@ -14,7 +14,6 @@
 
 /* [Render] */
 $fn = $preview ? 40 : 88;
-zFite = $preview ? 0.1 : 0; // z-fighting avoidance in preview
 
 /* [Shank] */
 shank_length = 96; // tarsometatarsus, cut off flat at the top

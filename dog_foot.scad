@@ -15,7 +15,6 @@
 
 /* [Render] */
 $fn = $preview ? 48 : 96;
-zFite = $preview ? 0.1 : 0; // z-fighting avoidance in preview
 
 /* [Paw] */
 paw_length = 62; // fore-aft length of the paw mass
