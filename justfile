@@ -1,6 +1,10 @@
 default:
     @just --list
 
+# Render each foot: one solid, standing on z = 0, cut flat at the top of the leg
+test:
+    python3 tests/test_feet.py
+
 # Everything CI runs, bar the tests
 check: fmt-check
 
